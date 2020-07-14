@@ -1,2 +1,2 @@
-# archive_of_university_assignments
+# archive_of_tasks_in_univ
 学校の課題のアーカイブ
