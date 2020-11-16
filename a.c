@@ -12,6 +12,7 @@
 #define MOD   258
 #define ID    259
 #define DONE  260
+
 #define ASSIGN 261
 #define WHILE 262
 #define BEGIN 263
@@ -34,6 +35,7 @@ char lexbuf[BSIZE];
 int lineno = 1;
 int tokenval = NONE;
 
+
 int lexan()
 {
 	int t;
@@ -43,12 +45,12 @@ int lexan()
 			;
 		else if ( t == '\n')
 			lineno = lineno + 1;
-		else if (t==':'){
-			t = getchar();
-			if (t=='='){
-				return ASSIGN;
-			}
-		}
+        else if ( t == ":") {
+            t = getchar();
+            if ( t == "=") {
+                return ASSIGN;
+            }
+        }
 		else if (isdigit(t)) {
 			ungetc(t, stdin);
 			scanf("%d", &tokenval);
@@ -73,15 +75,13 @@ int lexan()
 			return symtable[p].token;
 		}
 		else if (t == EOF)
-		    return DONE;
-
+			return DONE;
 		else {
 			tokenval = NONE;
 			return t;
 		}
 	}
 }
-
 
 /*****  parser.c  ******************************************************/
 
@@ -96,23 +96,22 @@ parse()
 }
 
 stmt(){
-	if (lookahead==ID){
-		printf("lvalue ");
-		emit(ID, tokenval);
-		match(ID);
-		if (lookahead==ASSIGN){
-			match(ASSIGN);
-			expr();
-			printf(":=\n");
-		}
-	}
-	else if (lookahead==WHILE){
-		printf("label test");
-
-	}
-	else if (lookahead==BEGIN){
-
-	}
+    if (lookahead==ID){//代入文の翻訳
+        printf("lvalue "); //"lvalue"を出力
+        emit(ID, tokenval); //出力関数を呼び出す
+        match(ID); //先読み
+        if (lookahead==ASSIGN){//ASSIGN を確認
+            match(ASSIGN); //先読み
+            expr(); //expr() を呼び出す
+            printf(":=\n"); //":="を出力
+        }
+    }
+    else if (lookahead==WHILE){ //while 文の翻訳
+        printf('label test'); //3.1.2 節参照
+    }
+    else if (lookahead==BEGIN){ //begin-end 文の翻訳
+        //3.1.3 節参照
+    }
 }
 
 expr()
@@ -126,7 +125,7 @@ expr()
 			match(lookahead); term(); emit(t, NONE);
 			continue;
 		default:
-			return 0;
+			return 0; //仮の返し;
 		}
 }
 
@@ -141,9 +140,10 @@ term()
 			match(lookahead); factor(); emit(t, NONE);
 			continue;
 		default:
-			return 0;
+			return 0; //仮の返し
 		}
 }
+
 cond()
 {
 	int t;
@@ -159,16 +159,17 @@ cond()
 			return 0;
 		}
 }
+
 factor()
 {
 	switch(lookahead) {
 		case '(':
 			match('('); expr(); match(')'); break;
 		case NUM:
-		    printf("push ");
+            printf("push ");
 			emit(NUM, tokenval); match(NUM); break;
 		case ID:
-		    printf("rvalue ");
+            printf("rvalue ");
 			emit(ID, tokenval); match(ID); break;
 		default:
 			error("syntax error");
@@ -182,7 +183,6 @@ match(t)
 		lookahead = lexan();
 	else error("syntax error");
 }
-
 
 
 /*****  emitter.c  ******************************************************/
@@ -252,7 +252,7 @@ struct entry keywords[] = {
 	"div", DIV,
 	"mod", MOD,
 	"while", WHILE,
-	"do", DO, 
+	"do", DO,
 	0, 0
 };
 
